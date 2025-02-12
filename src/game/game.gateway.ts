@@ -28,7 +28,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log(`Client disconnected: ${client.id}`);
   }
 
-  @SubscribeMessage('request')
+  @SubscribeMessage('question')
   async handleMessage(@MessageBody() body: any, @ConnectedSocket() clientSocket: Socket) {
   
     const data = JSON.parse(JSON.stringify(body))
@@ -60,7 +60,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
             "message": "Thank you for playing"
           }
         }
-        client.emit('response', resObj);
+        client.emit('answer', resObj);
     }catch(error){
       console.log('error ')
     }
