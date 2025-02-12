@@ -15,7 +15,7 @@ export class GameService {
 
   async createGameSession(player1, player2): Promise<GameSession> {
     const questions = await this.questionsService.findAll();
-    const selectedQuestions = questions.slice(0, 4); // Select 4 questions
+    const selectedQuestions = questions.slice(0, 4); 
 
     const session = new this.gameSessionModel({
       player1: player1,
@@ -25,7 +25,7 @@ export class GameService {
     return session.save();
   }
 
-  async findGameSession(sessionId: string): Promise<GameSessionDocument> { // Important: Note the type change
+  async findGameSession(sessionId: string): Promise<GameSessionDocument> { 
     const session = await this.gameSessionModel
         .findById(sessionId)
         .populate('questions')
@@ -35,7 +35,7 @@ export class GameService {
         throw new NotFoundException('Game session not found');
     }
 
-    return session; // This should now be a GameSessionDocument
+    return session;
 }
 
   async getFirstQuestion(sessionId, playerId) {
@@ -87,43 +87,5 @@ export class GameService {
     }
 
     return nextQuestion
-  }
-
-  async submitAnswer(sessionId: string, playerId: string, questionId: string, answer: string): Promise<GameSession> {
-    const session = await this.findGameSession(sessionId);
-    const questionIndex = session.questions.findIndex((q) => q._id.toString() === questionId);
-
-    if (questionIndex === -1) {
-      throw new NotFoundException('Question not found in the session');
-    }
-
-    const playerAnswers = session.answers[playerId] || [];
-    playerAnswers[questionIndex] = answer;
-    session.answers.set(playerId, playerAnswers);
-
-    await session.save();
-    return session;
-  }
-
-  async calculateScores(session: GameSessionDocument): Promise<{ winner: string | null }> {
-    const { player1, player2, questions, answers } = session;
-
-    const scores = { [player1]: 0, [player2]: 0 };
-
-    questions.forEach((question, index) => {
-      const correctAnswer = question.correctAnswer;
-      if (answers[player1]?.[index] === correctAnswer) scores[player1]++;
-      if (answers[player2]?.[index] === correctAnswer) scores[player2]++;
-    });
-
-    const score1 = 3
-    const score2 = 4
-    session.scores.set(player1, score1)
-    session.scores.set(player2, score2)
-    await session.save();
-
-    if (scores[player1] > scores[player2]) return { winner: player1 };
-    if (scores[player2] > scores[player1]) return { winner: player2 };
-    return { winner: null }; // Draw
   }
 }

@@ -52,9 +52,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       resObj = await this.getNextQuestion(sessionId, playerId, questionId, answer)
     }
 
-    //4.emit the response
     try{
-        // const { questions } = resObj
         if(!resObj) {
           resObj = {
             "message": "Thank you for playing"
@@ -79,20 +77,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   async getNextQuestion(sessionId: string, playerId: string, questionId: string, answer) {
     return this.gameService.saveAndGetNextQuestion(sessionId, playerId, questionId, answer)
-  }
-  async submitAnswer(client: Socket, payload: { sessionId: string; questionId: string; answer: string }) {
-    const { sessionId, questionId, answer } = payload;
-
-    const gameSession = await this.gameService.submitAnswer(client.id, sessionId, questionId, answer);
-
-    // Check if all answers are submitted and calculate scores
-    const allAnswered = Object.values(gameSession.answers).every((answers) => answers.length === gameSession.questions.length);
-
-    if (allAnswered) {
-      const session = await this.gameService.findGameSession(sessionId)
-      const result = await this.gameService.calculateScores(session);
-      this.server.to(sessionId).emit('game:end', result);
-    }
   }
 
   async closeConnection(clientId: string) {
